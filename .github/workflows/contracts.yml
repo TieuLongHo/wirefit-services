@@ -3,11 +3,13 @@
 # provider's IR lands before its consumers check, and so publishes never push
 # to the contracts repo concurrently.
 #
-# Two workarounds around Wirefit/wirefit/actions/check@master:
+# Workarounds around Wirefit/wirefit/actions/check@master:
 #  - the action go-installs wirefit but does not put GOPATH/bin on PATH for
 #    its later steps, so a pre-step adds it
 #  - the action resolves schema/dto paths from the workspace root (it has no
 #    --project input), so each job flattens its service dir to the root first
+#  - `wirefit publish` git-commits in the contracts-repo clone, which has no
+#    identity on a fresh runner, so a global one is set up front
 name: contracts
 
 on:
@@ -27,6 +29,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
           cp -r inventory-service/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
@@ -42,6 +46,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
           cp -r web-store/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
@@ -57,6 +63,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
           cp -r web-app-ts/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
