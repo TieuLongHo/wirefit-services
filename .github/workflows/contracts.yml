@@ -2,6 +2,12 @@
 # contracts repo, pushes to main also publish. Jobs run sequentially so the
 # provider's IR lands before its consumers check, and so publishes never push
 # to the contracts repo concurrently.
+#
+# Two workarounds around Wirefit/wirefit/actions/check@master:
+#  - the action go-installs wirefit but does not put GOPATH/bin on PATH for
+#    its later steps, so a pre-step adds it
+#  - the action resolves schema/dto paths from the workspace root (it has no
+#    --project input), so each job flattens its service dir to the root first
 name: contracts
 
 on:
@@ -19,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # the action go-installs wirefit; runners don't have GOPATH/bin on PATH
-      # and the composite action doesn't add it (upstream TODO)
-      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          cp -r inventory-service/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
-          manifest: inventory-service/contracts.yaml
+          manifest: contracts.yaml
           contracts-repo: TieuLongHo/wirefit-contracts
           token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
           version: master
@@ -34,10 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          cp -r web-store/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
-          manifest: web-store/contracts.yaml
+          manifest: contracts.yaml
           contracts-repo: TieuLongHo/wirefit-contracts
           token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
           version: master
@@ -47,10 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          cp -r web-app-ts/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
-          manifest: web-app-ts/contracts.yaml
+          manifest: contracts.yaml
           contracts-repo: TieuLongHo/wirefit-contracts
           token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
           version: master
