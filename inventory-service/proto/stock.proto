@@ -1,0 +1,18 @@
+syntax = "proto3";
+package acme.inventory;
+
+// The contract for inventory.get-stock. wirefit imports this .proto directly —
+// proto3 JSON field names (lowerCamelCase) are what land on the wire.
+message StockLevel {
+  string sku = 1;
+  int32 available_units = 2;
+  int32 reserved_units = 3;
+  bool backorderable = 4;
+  Warehouse warehouse = 5;
+  repeated string tags = 6;
+}
+
+message Warehouse {
+  string code = 1;
+  string region = 2;
+}

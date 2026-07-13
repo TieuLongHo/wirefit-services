@@ -1,0 +1,11 @@
+service: web-store
+schema-version: 1
+consumes:
+  # Reads inventory-service's get-stock (sourced from stock.proto). It only needs
+  # to know the sku, how many units are free, and whether backorders are allowed.
+  - id: inventory.get-stock
+    provider: inventory-service
+    dto: src/StockView.ts#StockView
+extractors:
+  - match: ".ts"
+    command: wirefit-ts

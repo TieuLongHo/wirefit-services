@@ -1,0 +1,9 @@
+service: web-app-ts
+schema-version: 1
+consumes:
+  - id: orders.get-order
+    provider: order-service
+    dto: src/OrderView.ts#OrderView
+extractors:
+  - match: ".ts"
+    command: wirefit-ts

@@ -1,0 +1,56 @@
+# Contract gate for every service in this repo: PRs are checked against the
+# contracts repo, pushes to main also publish. Jobs run sequentially so the
+# provider's IR lands before its consumers check, and so publishes never push
+# to the contracts repo concurrently.
+name: contracts
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  inventory-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # the action go-installs wirefit; runners don't have GOPATH/bin on PATH
+      # and the composite action doesn't add it (upstream TODO)
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: inventory-service/contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master
+
+  web-store:
+    needs: inventory-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: web-store/contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master
+
+  web-app-ts:
+    needs: web-store
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: web-app-ts/contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master

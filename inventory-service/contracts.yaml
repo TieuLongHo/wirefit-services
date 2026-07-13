@@ -1,0 +1,9 @@
+service: inventory-service
+schema-version: 1
+provides:
+  # REST response sourced DIRECTLY from a protobuf message (schema-native).
+  # The .proto IS the contract; wirefit imports it, no code extraction.
+  - id: inventory.get-stock
+    kind: rest
+    direction: response
+    schema: proto/stock.proto#StockLevel
