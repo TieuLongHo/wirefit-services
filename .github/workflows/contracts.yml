@@ -57,7 +57,7 @@ jobs:
           version: master
 
   web-app-ts:
-    needs: web-store
+    needs: order-service
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,6 +66,60 @@ jobs:
           git config --global user.name "wirefit-bot"
           git config --global user.email "wirefit-bot@users.noreply.github.com"
           cp -r web-app-ts/. .
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master
+
+  order-service:
+    needs: web-store
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
+          cp -r order-service/. .
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master
+
+  fulfillment-service:
+    needs: web-app-ts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
+          cp -r fulfillment-service/. .
+      - uses: Wirefit/wirefit/actions/check@master
+        with:
+          manifest: contracts.yaml
+          contracts-repo: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          version: master
+
+  notification-service:
+    needs: fulfillment-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          git config --global user.name "wirefit-bot"
+          git config --global user.email "wirefit-bot@users.noreply.github.com"
+          go install github.com/wirefit/wirefit/cmd/wirefit-py@master
+          python -m venv .venv
+          .venv/bin/pip install "pydantic>=2,<3"
+          cp -r notification-service/. .
       - uses: Wirefit/wirefit/actions/check@master
         with:
           manifest: contracts.yaml

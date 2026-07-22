@@ -1,0 +1,11 @@
+service: notification-service
+schema-version: 1
+consumes:
+  # Pydantic defaults would be optional for a consumer; these required fields
+  # make the email notification depend on the complete shipment payload.
+  - id: fulfillment.get-shipment
+    provider: fulfillment-service
+    dto: src/models.py#ShipmentEmailView
+extractors:
+  - match: ".py"
+    command: "wirefit-py --python .venv/bin/python"

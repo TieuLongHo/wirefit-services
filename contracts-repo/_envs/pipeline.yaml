@@ -1,0 +1,4 @@
+# Copy this file to the root of the Wirefit contracts repository as
+# _envs/pipeline.yaml. Wirefit uses the order to render promotion readiness.
+schema-version: 1
+envs: [dev, stg, prd]
