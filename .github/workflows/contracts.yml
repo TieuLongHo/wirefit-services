@@ -83,6 +83,7 @@ jobs:
           git config --global user.name "wirefit-bot"
           git config --global user.email "wirefit-bot@users.noreply.github.com"
           cp -r order-service/. .
+          mvn -q -DskipTests compile
       - uses: Wirefit/wirefit/actions/check@master
         with:
           manifest: contracts.yaml
