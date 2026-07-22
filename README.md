@@ -10,7 +10,7 @@ checking against [TieuLongHo/wirefit-contracts](https://github.com/TieuLongHo/wi
 | `order-service` | provider | `OrderResponse` via `wirefit-java` and Maven |
 | `web-app-ts` | consumer of `order-service`'s `orders.get-order` | `src/OrderView.ts` via `wirefit-ts` |
 | `fulfillment-service` | consumer of `orders.get-order`; provider of `fulfillment.get-shipment` | Go structs via the built-in extractor |
-| `notification-service` | consumer of `fulfillment.get-shipment` | Pydantic v2 model via `wirefit-py` |
+| `notification-service` | consumer of `billing.invoice-created` | Pydantic v2 model via `wirefit-py` |
 
 CI ([contracts.yml](.github/workflows/contracts.yml)): every PR runs `wirefit check`
 per service (breaking a consumed field blocks the merge with a sticky PR comment);

@@ -1,11 +1,17 @@
 from datetime import datetime
+from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
-class ShipmentEmailView(BaseModel):
-    """The shipment fields used to compose a delivery notification."""
+class InvoiceEmailView(BaseModel):
+    """The billing event fields used to compose an invoice email."""
 
-    tracking_number: str
-    order_id: str
-    estimated_delivery_at: datetime
+    amountCents: int
+    createdAt: datetime
+    currency: str
+    customerEmail: str
+    invoiceId: UUID
+    orderId: UUID
+    status: Literal["DRAFT", "ISSUED", "PAID", "VOID"]
