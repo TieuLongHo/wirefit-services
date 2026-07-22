@@ -1,0 +1,12 @@
+service: fulfillment-service
+schema-version: 1
+provides:
+  - id: fulfillment.get-shipment
+    kind: rest
+    direction: response
+    dto: ./internal/api#ShipmentView
+consumes:
+  # This projection states exactly which fields fulfilment reads from an order.
+  - id: orders.get-order
+    provider: order-service
+    dto: ./internal/orders#OrderView

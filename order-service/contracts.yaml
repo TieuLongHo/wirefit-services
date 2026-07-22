@@ -1,0 +1,11 @@
+service: order-service
+schema-version: 1
+provides:
+  # A Java provider. @JsonProperty keeps the public snake_case JSON names explicit.
+  - id: orders.get-order
+    kind: rest
+    direction: response
+    dto: com.acme.orders.api.OrderResponse
+extractors:
+  - match: "*"
+    command: "wirefit-java --build-tool maven"

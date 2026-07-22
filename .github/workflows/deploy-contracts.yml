@@ -1,0 +1,92 @@
+# Contract-aware deployment example. The GitHub environment is deliberately the
+# same name as Wirefit's environment lock, so approval history and compatibility
+# records refer to dev, stg, and prd consistently.
+name: deploy contracts
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target Wirefit and GitHub environment
+        required: true
+        type: choice
+        options: [dev, stg, prd]
+      service:
+        description: Service to deploy
+        required: true
+        type: choice
+        options: [inventory-service, web-store, order-service, web-app-ts, fulfillment-service, notification-service]
+      source_environment:
+        description: Use release for this checkout, dev for dev → stg, or stg for stg → prd.
+        required: true
+        type: choice
+        options: [release, dev, stg]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select service manifest
+        run: cp -r "${{ inputs.service }}"/. .
+      - name: Validate stage transition
+        run: |
+          case "${{ inputs.source_environment }}:${{ inputs.environment }}" in
+            release:dev|dev:stg|stg:prd) ;;
+            *)
+              echo "Valid transitions are release → dev, dev → stg, and stg → prd." >&2
+              exit 1
+              ;;
+          esac
+      - uses: actions/checkout@v4
+        with:
+          repository: TieuLongHo/wirefit-contracts
+          token: ${{ secrets.CONTRACTS_REPO_TOKEN }}
+          path: .wirefit/contracts-repo
+      - name: Install Wirefit
+        run: |
+          go install github.com/wirefit/wirefit/cmd/wirefit@master
+          go install github.com/wirefit/wirefit/cmd/wirefit-ts@master
+          go install github.com/wirefit/wirefit/cmd/wirefit-java@master
+          go install github.com/wirefit/wirefit/cmd/wirefit-py@master
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Prepare language runtime
+        if: inputs.service == 'notification-service'
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install "pydantic>=2,<3"
+      - name: Extract release candidate
+        if: inputs.source_environment == 'release'
+        run: wirefit extract -f contracts.yaml
+      - name: Gate the deployment
+        run: |
+          if [ "${{ inputs.source_environment }}" != "release" ]; then
+            wirefit can-i-deploy \
+              --from-env "${{ inputs.source_environment }}" \
+              --env "${{ inputs.environment }}" \
+              --service "${{ inputs.service }}" \
+              --contracts-repo .wirefit/contracts-repo
+          else
+            wirefit can-i-deploy \
+              -f contracts.yaml \
+              --env "${{ inputs.environment }}" \
+              --contracts-repo .wirefit/contracts-repo
+          fi
+      - name: Deploy service
+        run: |
+          # Replace this line with the service's real deployment command.
+          echo "Deploying ${{ inputs.service }} to ${{ inputs.environment }}"
+      - name: Record the deployed contract
+        run: |
+          git -C .wirefit/contracts-repo config user.name "wirefit-bot"
+          git -C .wirefit/contracts-repo config user.email "wirefit-bot@users.noreply.github.com"
+          wirefit record-deploy \
+            -f contracts.yaml \
+            --env "${{ inputs.environment }}" \
+            --contracts-repo .wirefit/contracts-repo
+          git -C .wirefit/contracts-repo push

@@ -1,0 +1,12 @@
+service: notification-service
+schema-version: 1
+consumes:
+  # A Pydantic v2 consumer of the billing event already published in the demo
+  # contracts repository. All fields are required, so the schema documents the
+  # values the notification workflow reads before sending a receipt.
+  - id: billing.invoice-created
+    provider: billing-service
+    dto: src/models.py#InvoiceEmailView
+extractors:
+  - match: ".py"
+    command: "wirefit-py --python .venv/bin/python"
