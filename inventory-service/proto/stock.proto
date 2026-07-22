@@ -5,7 +5,8 @@ package acme.inventory;
 // proto3 JSON field names (lowerCamelCase) are what land on the wire.
 message StockLevel {
   string sku = 1;
-  int32 available_units = 2;
+  reserved 2;
+  reserved "available_units";
   int32 reserved_units = 3;
   bool backorderable = 4;
   Warehouse warehouse = 5;
