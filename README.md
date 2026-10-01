@@ -3,14 +3,14 @@
 Demo service repo wired to [wirefit](https://github.com/Wirefit/wirefit) contract
 checking against [TieuLongHo/wirefit-contracts](https://github.com/TieuLongHo/wirefit-contracts).
 
-| service | role | contract source |
-|---|---|---|
-| `inventory-service` | provider | `proto/stock.proto#StockLevel` (schema-native, no extractor) |
-| `web-store` | consumer of `inventory.get-stock` | `src/StockView.ts` via `wirefit-ts` |
-| `order-service` | provider | `OrderResponse` via `wirefit-java` and Maven |
-| `web-app-ts` | consumer of `order-service`'s `orders.get-order` | `src/OrderView.ts` via `wirefit-ts` |
-| `fulfillment-service` | consumer of `orders.get-order`; provider of `fulfillment.get-shipment` | Go structs via the built-in extractor |
-| `notification-service` | consumer of `billing.invoice-created` | Pydantic v2 model via `wirefit-py` |
+| service                | role                                                                   | contract source                                              |
+| ---------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `inventory-service`    | provider                                                               | `proto/stock.proto#StockLevel` (schema-native, no extractor) |
+| `web-store`            | consumer of `inventory.get-stock`                                      | `src/StockView.ts` via `wirefit-ts`                          |
+| `order-service`        | provider                                                               | `OrderResponse` via `wirefit-java` and Maven                 |
+| `web-app-ts`           | consumer of `order-service`'s `orders.get-order`                       | `src/OrderView.ts` via `wirefit-ts`                          |
+| `fulfillment-service`  | consumer of `orders.get-order`; provider of `fulfillment.get-shipment` | Go structs via the built-in extractor                        |
+| `notification-service` | consumer of `billing.invoice-created`                                  | Pydantic v2 model via `wirefit-py`                           |
 
 CI ([contracts.yml](.github/workflows/contracts.yml)): every PR runs `wirefit check`
 per service (breaking a consumed field blocks the merge with a sticky PR comment);
@@ -26,7 +26,7 @@ the deployed version after the deployment step. For a promotion, it checks the v
 already recorded in the previous environment, so no new artifact is accidentally promoted.
 
 Wirefit stores the stage order in the **contracts repository**. Add this once there (the
-copyable example is [contracts-repo/_envs/pipeline.yaml](contracts-repo/_envs/pipeline.yaml)):
+copyable example is [contracts-repo/\_envs/pipeline.yaml](contracts-repo/_envs/pipeline.yaml)):
 
 ```yaml
 schema-version: 1
